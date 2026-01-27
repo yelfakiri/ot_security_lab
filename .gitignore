@@ -1,0 +1,6 @@
+.env
+*.pcap
+*.log
+data/
+volumes/
+elastic-data/
