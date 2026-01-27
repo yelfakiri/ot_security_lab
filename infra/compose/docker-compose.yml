@@ -1,0 +1,73 @@
+name: soc-ot-lab
+
+services:
+  ##########################################
+  # Conduit — Minimal Router/Firewall
+  # Rôle : point de passage inter-zones (Zones & Conduits IEC 62443)
+  # Politique : DROP par défaut (rien ne traverse sans règle)
+  ##########################################
+  router-fw:
+    image: alpine:3.20
+    container_name: router-fw
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+    volumes:
+      - ../router-fw/init.sh:/init.sh:ro
+    entrypoint: ["/bin/sh", "/init.sh"]
+    restart: unless-stopped
+    networks:
+      net_dmz:
+        ipv4_address: 172.20.40.254
+      net_l3:
+        ipv4_address: 172.20.30.254
+      net_l2:
+        ipv4_address: 172.20.20.254
+      net_l0l1:
+        ipv4_address: 172.20.10.254
+
+############################################
+# NETWORKS — OT / ICS ZONES (Purdue Model)
+############################################
+networks:
+
+  # Level 0–1 — Process / PLC / Field Devices
+  net_l0l1:
+    name: net_l0l1
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.10.0/24
+
+  # Level 2 — Control Network
+  net_l2:
+    name: net_l2
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.20.0/24
+
+  # Level 3 — Operations / SCADA
+  net_l3:
+    name: net_l3
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.30.0/24
+
+  # Level 3.5 — Industrial DMZ
+  net_dmz:
+    name: net_dmz
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.40.0/24
+
+  # SOC / Security Monitoring Zone
+  net_soc:
+    name: net_soc
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.50.0/24
