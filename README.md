@@ -1,4 +1,14 @@
 ## OT Security Lab
-This project is a modular Operational Technology (OT) lab designed to simulate industrial networks and protocols for cybersecurity testing.
 
-In the future, this lab will allow testing and validation of attack simulations, detection strategies, and monitoring techniques for OT systems, in a safe and fully isolated environment. It will serve as a platform to experiment with industrial protocols, network segmentation, and security controls, following standard OT best practices.
+This project is a modular Operational Technology (OT) security lab designed to simulate realistic industrial networks and protocols for cybersecurity testing.
+
+The lab focuses on OT-specific constraints and best practices, including network segmentation, controlled inter-zone communications, and alignment with the Purdue Model and IEC 62443 principles.
+
+### Project Status
+
+- Phase 1 – Technical Infrastructure: Completed
+- Segmented OT and Industrial DMZ networks
+- Dedicated inter-zone router/firewall
+- Default deny policy between zones
+
+The environment now provides a solid foundation for upcoming phases involving attack simulation, network-based detection, and SOC-oriented monitoring.
