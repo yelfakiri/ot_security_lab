@@ -1,11 +1,6 @@
 name: soc-ot-lab
 
 services:
-  ##########################################
-  # Conduit — Minimal Router/Firewall
-  # Rôle : point de passage inter-zones (Zones & Conduits IEC 62443)
-  # Politique : DROP par défaut (rien ne traverse sans règle)
-  ##########################################
   router-fw:
     image: alpine:3.20
     container_name: router-fw
@@ -27,9 +22,44 @@ services:
       net_l0l1:
         ipv4_address: 172.20.10.254
 
-############################################
-# NETWORKS — OT / ICS ZONES (Purdue Model)
-############################################
+  plc-modbus:
+    image: python:3.11-alpine
+    container_name: plc-modbus
+    cap_add:
+      - NET_ADMIN
+    entrypoint: ["/bin/sh","-lc"]
+    command:
+      - >
+        ip route add 172.20.30.0/24 via 172.20.10.254 || true;
+        pip install --no-cache-dir pymodbus==3.6.9;
+        python3 -u /app/modbus_server.py
+    volumes:
+      - ../ot/modbus/modbus_server.py:/app/modbus_server.py:ro
+    restart: unless-stopped
+    networks:
+      net_l0l1:
+        ipv4_address: 172.20.10.10
+
+  scada-modbus-client:
+    image: python:3.11-alpine
+    container_name: scada-modbus-client
+    cap_add:
+      - NET_ADMIN
+    entrypoint: ["/bin/sh","-lc"]
+    command:
+      - >
+        ip route add 172.20.10.0/24 via 172.20.30.254 || true;
+        pip install --no-cache-dir pymodbus==3.6.9;
+        python3 -u /app/modbus_client.py
+    volumes:
+      - ../ot/modbus/modbus_client.py:/app/modbus_client.py:ro
+    restart: unless-stopped
+    depends_on:
+      - plc-modbus
+      - router-fw
+    networks:
+      net_l3:
+        ipv4_address: 172.20.30.10
 networks:
 
   # Level 0–1 — Process / PLC / Field Devices
